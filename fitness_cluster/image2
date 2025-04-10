@@ -75,29 +75,3 @@ spec:
     - port: 4040
       protocol: TCP
       targetPort: 4040
---- 
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: fitness-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: ""
-spec:
-  ingressClassName: nginx
-  rules:
-    - http:
-        paths:
-          - path: /workouts
-            pathType: Prefix
-            backend:
-              service:
-                name: svc1
-                port:
-                  number: 5000
-          - path: /weifit-calculator
-            pathType: Prefix
-            backend:
-              service:
-                name: svc2
-                port:
-                  number: 4040
