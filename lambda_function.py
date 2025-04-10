@@ -193,7 +193,7 @@ qa_data = [
         "answer": (
             "~ Sihha Health Chatbot\n"
             "~ Created by khan Mohammed in Hyderabad, Telangana\n"
-            "~ A project named Sihha, launched in April 2023\n"
+            "~ A project named Sihha, launched in April 2025\n"
             "~ Provides open-source, evidence-based fitness guidance and health support\n"
             "~ Driven by the commitment to democratize accessible and reliable health resources"
         )
