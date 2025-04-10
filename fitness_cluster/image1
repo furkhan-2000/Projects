@@ -1,0 +1,111 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: fitnesspriority
+value: 1000000
+globalDefault: false
+description: "hello this is a user"
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv1
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: "900Mi"
+  hostPath:
+    path: /demo
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: development
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: deprole1
+rules:
+  - apiGroups: ["", "apps", "networking.k8s.io", "scheduling.k8s.io"]
+    resources: ["pods", "replicasets", "deployments", "services", "persistentvolumes", "persistentvolumeclaims", "ingresses", "priorityclasses"]
+    verbs: ["create", "delete", "get", "list", "update", "bind"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fitness-service
+subjects:
+  - kind: ServiceAccount
+    name: development
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: deprole1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+spec:
+  storageClassName: standard
+  volumeName: pv1
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "900Mi"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workouts
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      tier: fit
+  template:
+    metadata:
+      labels:
+        tier: fit
+    spec:
+      serviceAccountName: development
+      terminationGracePeriodSeconds: 20
+      priorityClassName: fitnesspriority
+      containers:
+        - name: image1
+          image: furkhan2000/fitness-tracker-app:workouts
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5000
+          volumeMounts:
+            - name: store
+              mountPath: /pvc-data
+          resources:
+            requests:
+              cpu: "700m"
+              memory: "500Mi"
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: store
+          persistentVolumeClaim:
+            claimName: pvc1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc1
+spec:
+  selector:
+    tier: fit
+  ports:
+    - port: 5000
+      protocol: TCP
+      targetPort: 5000
