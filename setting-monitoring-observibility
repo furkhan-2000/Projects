@@ -1,0 +1,30 @@
+EKS-cluster 
+Kubectl 
+Helm 
+ if not installed helm, install (curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+)
+Add helm repo::              helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+                             helm repo add stable https://charts.helm.sh/stable
+                             helm repo add grafana https://grafana.github.io/helm-charts
+                             helm repo update
+Create a ns: 
+                             kubectl create namespace monitoring
+   helm install kind-prometheus prometheus-community/kube-prometheus-stack \
+  -n monitoring \
+  --set prometheus.service.nodePort=30000 \
+  --set prometheus.service.type=NodePort \
+  --set grafana.service.nodePort=31000 \
+  --set grafana.service.type=NodePort \
+  --set alertmanager.service.nodePort=32000 \
+  --set alertmanager.service.type=NodePort \
+  --set prometheus-node-exporter.service.nodePort=32001 \
+  --set prometheus-node-exporter.service.type=NodePort \
+  
+To extract grafana-pass:::: 
+    kubectl get secret -n monitoring 
+
+    Kubectl get secret kind-prometheus-grafana -n monitoring -o yaml 
+                 echo "cHJvbS1vcGVyYXRvcg==" | base64 --decode ; echo    
+
+
+ 
