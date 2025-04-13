@@ -1,0 +1,16 @@
+ARGOCD-setup 
+For setting argocd into cluster 
+First create namespace 
+    kubectl create ns argocd 
+
+Then create manifests of argocd: (in will install or fetch all required manifests)  
+       kubectl create -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml 
+Check for service of argocd 
+        kubectl  get svc -n argocd
+Convert argocd server from clusterip to nodepor
+         kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}' 
+Now expose/port forward 
+            kubectl port-forward svc/argocd-server -n argocd  8443:443 --address=0.0.0.0 &
+Then, now to extarct password of argocd 
+             kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d && echo
+
