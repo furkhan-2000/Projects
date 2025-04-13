@@ -1,0 +1,37 @@
+Architecture Overview:: 
+
+Backend:                 Python-based application logic.
+Docker Images:           Backend code containerized into Docker images.
+Manifests:               Kubernetes manifests define deployments.
+Git:                     Manifests stored for version control.
+ArgoCD:                 Syncs Git repository with Kubernetes for continuous deployment.
+Kubernetes Cluster:     Orchestrates the containerized application.
+Kubernetes Dashboard:    Provides cluster visibility.
+Prometheus: Collects metrics.
+Grafana:                 Visualizes metrics from Prometheus (Prometheus feeds input; Grafana outputs the metric visualizations).
+Ingress Controller:       Manages URL endpoints and routes traffic.
+AWS Branch:
+AWS Lambda:              Powers a chatbot backend.
+AWS API Gateway:        Exposes the Lambda and integrates into the Ingress Controller.
+Frontend UI:            Single user interface interacting with backend services and the chatbot.
+---
+steps::: 
+ #create dpeloyments for app-services, you will find this is in fitness_cluster dir 
+ #create a cluster with eks or with kind (if kind, please refer #creating-kind-cluster notes in this dir only)
+ #setup argocd in-your cluster, for setting argocd in cluster, please refer argocd setup file in this dir only. 
+ #install namespaces accordingly in your cluster and install nginx-ingress controller 
+      kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.3.0/deploy/static/provider/cloud/deploy.yaml
+ #Then you can expose your services through path-based routing 
+ #Setup kubernetes-dasboard on cluster 
+       kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.7.0/aio/deploy/recommended.yaml
+ #Now change cluster ip to nodeport::  kubectl patch svc kubernetes-dashboard -n kubernetes-dashboard -p '{"spec": {"type": "NodePort"}}'
+ #For token generation 
+       kubectl -n kubernetes-dashboard create token admin-user 
+ #to do port-forwarding :::    kubectl get svc -n kubernetes-dashboard
+                               kubectl port-forward svc/kubernetes-dashboard -n kubernetes-dashboard 8080:443 --address=0.0.0.0 &
+ access dashboard, argocd, 
+ for setting Prometheus & grafana follow monitoring-observibililty file in this dir only 
+  # for chatbot-use aws lambda (backend) :: code in this dir lambda_function.py upload zip format of lambda_finction.py file and package dir to aws lambda 
+      and connect it to apigateway (post,option) 
+       and then connect this apigateway endopint to aws s3 static hosting 
+
